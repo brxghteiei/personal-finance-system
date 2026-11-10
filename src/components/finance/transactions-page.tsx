@@ -86,8 +86,9 @@ export function TransactionsPage() {
             ))}
           </div>
           <Button
-            type="button"
-            variant="outline"
+          data-tour="transaction-filters"
+          type="button"
+          variant="outline"
             size="icon"
             aria-label="เปิดตัวกรองการค้นหา"
             aria-expanded={searchOpen}

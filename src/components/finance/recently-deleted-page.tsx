@@ -37,11 +37,14 @@ export function RecentlyDeletedPage() {
       )}
       <Panel>
         {transactions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{m.pages.recentlyDeleted.empty}</p>
+          <p data-tour="deleted-content" className="text-sm text-muted-foreground">{m.pages.recentlyDeleted.empty}</p>
         ) : (
           <ul className="divide-y divide-border">
-            {transactions.map((transaction) => (
-              <li key={transaction.id} className="flex flex-wrap items-center gap-3 py-4">
+            {transactions.map((transaction, index) => (
+              <li
+                key={transaction.id}
+                className="flex flex-wrap items-center gap-3 py-4"
+              >
                 <div
                   className={cn(
                     'flex size-9 shrink-0 items-center justify-center rounded-full',
@@ -63,7 +66,7 @@ export function RecentlyDeletedPage() {
                   {transaction.type === 'income' ? '+' : '−'}
                   {formatCurrency(transaction.amount, currency)}
                 </p>
-                <div className="flex gap-1">
+                <div data-tour={index === 0 ? 'deleted-content' : undefined} className="flex gap-1">
                   <Button
                     type="button"
                     variant="ghost"
