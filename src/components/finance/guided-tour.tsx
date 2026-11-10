@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { ArrowLeft, ArrowRight, X } from 'lucide-react'
 
@@ -44,12 +44,18 @@ type Spotlight = {
   viewportHeight: number
 }
 
+type CardPosition = {
+  top: number
+  left: number
+}
+
 export function GuidedTour() {
   const pathname = usePathname()
   const router = useRouter()
   const [active, setActive] = useState(false)
   const [stepIndex, setStepIndex] = useState(0)
   const [spotlight, setSpotlight] = useState<Spotlight | null>(null)
+  const [cardPosition, setCardPosition] = useState<CardPosition | null>(null)
   const dialogRef = useRef<HTMLDivElement>(null)
   const autoStartChecked = useRef(false)
   const step = STEPS[stepIndex]
@@ -87,17 +93,23 @@ export function GuidedTour() {
       return
     }
 
-    let hasScrolledToTarget = false
     const updateSpotlight = () => {
       const target = document.querySelector<HTMLElement>(step.selector)
       if (!target) return
 
-      if (!hasScrolledToTarget) {
-        hasScrolledToTarget = true
-        target.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      let bounds = target.getBoundingClientRect()
+      const targetCenterY = bounds.top + bounds.height / 2
+      const targetCenterX = bounds.left + bounds.width / 2
+      if (
+        targetCenterY < 0 ||
+        targetCenterY > window.innerHeight ||
+        targetCenterX < 0 ||
+        targetCenterX > window.innerWidth
+      ) {
+        target.scrollIntoView({ block: 'center', behavior: 'auto' })
+        bounds = target.getBoundingClientRect()
       }
 
-      const bounds = target.getBoundingClientRect()
       const nextSpotlight = {
         top: bounds.top,
         left: bounds.left,
@@ -132,6 +144,60 @@ export function GuidedTour() {
     }
   }, [active, pathname, router, step])
 
+  useLayoutEffect(() => {
+    const card = dialogRef.current
+    if (!active || !spotlight || !card) return
+
+    const updateCardPosition = () => {
+      const bounds = card.getBoundingClientRect()
+      const margin = 16
+      const gap = 16
+      const maxLeft = Math.max(margin, spotlight.viewportWidth - bounds.width - margin)
+      const maxTop = Math.max(margin, spotlight.viewportHeight - bounds.height - margin)
+      const centeredLeft = spotlight.left + spotlight.width / 2 - bounds.width / 2
+      const centeredTop = spotlight.top + spotlight.height / 2 - bounds.height / 2
+      const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max)
+      const candidates = [
+        { top: spotlight.top + spotlight.height + gap, left: centeredLeft },
+        { top: spotlight.top - bounds.height - gap, left: centeredLeft },
+        { top: centeredTop, left: spotlight.left + spotlight.width + gap },
+        { top: centeredTop, left: spotlight.left - bounds.width - gap },
+      ].map(({ top, left }) => ({
+        top: clamp(top, margin, maxTop),
+        left: clamp(left, margin, maxLeft),
+      }))
+      const position = candidates.map((candidate) => {
+        const overlapWidth = Math.max(
+          0,
+          Math.min(candidate.left + bounds.width, spotlight.left + spotlight.width) -
+            Math.max(candidate.left, spotlight.left),
+        )
+        const overlapHeight = Math.max(
+          0,
+          Math.min(candidate.top + bounds.height, spotlight.top + spotlight.height) -
+            Math.max(candidate.top, spotlight.top),
+        )
+        return { ...candidate, score: overlapWidth * overlapHeight }
+      }).reduce((best, candidate) => candidate.score < best.score ? candidate : best)
+
+      setCardPosition((current) =>
+        current?.top === position.top && current.left === position.left
+          ? current
+          : { top: position.top, left: position.left },
+      )
+    }
+
+    const observer = new ResizeObserver(updateCardPosition)
+    observer.observe(card)
+    window.addEventListener('resize', updateCardPosition)
+    updateCardPosition()
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', updateCardPosition)
+    }
+  }, [active, spotlight, stepIndex])
+
   useEffect(() => {
     if (!active) return
 
@@ -148,15 +214,7 @@ export function GuidedTour() {
   const right = spotlight.left + spotlight.width
   const bottom = spotlight.top + spotlight.height
   const cardWidth = Math.min(360, spotlight.viewportWidth - 32)
-  const cardLeft = Math.min(
-    Math.max(spotlight.left + spotlight.width / 2 - cardWidth / 2, 16),
-    spotlight.viewportWidth - cardWidth - 16,
-  )
-  const belowTop = bottom + 20
-  const cardTop =
-    belowTop + 200 <= spotlight.viewportHeight
-      ? belowTop
-      : Math.max(16, spotlight.top - 200)
+  const compact = spotlight.viewportHeight < 420
 
   return (
     <>
@@ -222,10 +280,17 @@ export function GuidedTour() {
         aria-labelledby="guided-tour-title"
         aria-describedby="guided-tour-description"
         tabIndex={-1}
-        className="fixed z-[83] rounded-xl border border-border bg-card p-5 text-card-foreground shadow-2xl outline-none"
-        style={{ top: cardTop, left: cardLeft, width: cardWidth, maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto' }}
+        className={`fixed z-[83] rounded-xl border border-border bg-card text-card-foreground shadow-2xl outline-none ${compact ? 'p-3' : 'p-5'}`}
+        style={{
+          top: cardPosition?.top ?? 16,
+          left: cardPosition?.left ?? 16,
+          width: cardWidth,
+          maxHeight: 'calc(100dvh - 32px)',
+          overflowY: 'auto',
+          visibility: cardPosition ? 'visible' : 'hidden',
+        }}
       >
-        <div className="mb-3 flex items-center justify-between gap-3">
+        <div className={`flex items-center justify-between gap-3 ${compact ? 'mb-1' : 'mb-3'}`}>
           <p className="text-xs font-medium text-muted-foreground">ขั้นตอนที่ {stepIndex + 1} จาก {STEPS.length}</p>
           <button
             type="button"
@@ -237,10 +302,10 @@ export function GuidedTour() {
           </button>
         </div>
         <h2 id="guided-tour-title" className="font-semibold">{step.title}</h2>
-        <p id="guided-tour-description" className="mt-2 text-sm leading-6 text-muted-foreground">
+        <p id="guided-tour-description" className={`text-sm text-muted-foreground ${compact ? 'mt-1 leading-5' : 'mt-2 leading-6'}`}>
           {step.description}
         </p>
-        <div className="mt-5 flex items-center justify-between gap-3">
+        <div className={`flex items-center justify-between gap-3 ${compact ? 'mt-3' : 'mt-5'}`}>
           <button
             type="button"
             onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
