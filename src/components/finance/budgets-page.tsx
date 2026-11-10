@@ -53,7 +53,7 @@ export function BudgetsPage() {
         title={m.pages.budgets.title}
         description={`${m.pages.budgets.description} · ${monthLabel(budgetMonth, 'long')}`}
         action={
-          <Button onClick={() => setFormOpen((open) => !open)} aria-expanded={formOpen}>
+          <Button data-tour="create-budget" onClick={() => setFormOpen((open) => !open)} aria-expanded={formOpen}>
             <Plus data-icon="inline-start" /> {m.pages.budgets.create}
           </Button>
         }

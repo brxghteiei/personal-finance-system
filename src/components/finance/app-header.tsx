@@ -3,11 +3,12 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, ChartNoAxesCombined, House, PieChart, ReceiptText, RotateCcw, Tags, Wallet } from 'lucide-react'
+import { CalendarDays, ChartNoAxesCombined, CircleHelp, House, PieChart, ReceiptText, RotateCcw, Tags, Wallet } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { messages as m } from '@/lib/messages'
 import { cn } from '@/lib/utils'
 import { useFinance } from './finance-provider'
+import { START_GUIDE_EVENT } from './guided-tour'
 
 const NAV_ITEMS = [
   { href: '/', label: m.nav.overview, icon: House },
@@ -95,6 +96,15 @@ export function AppToolbar() {
           />
         </label>
       )}
+      <button
+        type="button"
+        onClick={() => window.dispatchEvent(new Event(START_GUIDE_EVENT))}
+        className="inline-flex h-9 items-center gap-2 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
+        aria-label="เริ่มแนะนำการใช้งาน"
+      >
+        <CircleHelp aria-hidden="true" className="size-4" />
+        <span>คู่มือเริ่มต้น</span>
+      </button>
       <ThemeToggle />
     </header>
   )

@@ -4,6 +4,7 @@ import { GeistSans } from 'geist/font/sans'
 import '@fontsource-variable/noto-sans-thai'
 import { AppHeader, AppToolbar } from '@/components/finance/app-header'
 import { FinanceProvider } from '@/components/finance/finance-provider'
+import { GuidedTour } from '@/components/finance/guided-tour'
 import { ThemeProvider } from '@/components/theme-provider'
 import './globals.css'
 
@@ -33,6 +34,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                 {children}
               </div>
             </div>
+            <GuidedTour />
           </FinanceProvider>
         </ThemeProvider>
       </body>

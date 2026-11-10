@@ -41,7 +41,7 @@ export function TransactionsPanel({ transactions, categories, currency, onAdd, o
           <h2 id="tx-heading" className="font-semibold">
             {m.transactionsPanel.title}
           </h2>
-          <Button size="sm" onClick={() => setFormOpen((o) => !o)} aria-expanded={formOpen}>
+          <Button data-tour="add-transaction" size="sm" onClick={() => setFormOpen((o) => !o)} aria-expanded={formOpen}>
             {formOpen ? <X aria-hidden="true" /> : <Plus aria-hidden="true" />}
             {formOpen ? m.transactionsPanel.close : m.transactionsPanel.add}
           </Button>
