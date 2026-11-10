@@ -49,7 +49,7 @@ export function ReportsPage() {
         title={m.pages.reports.title}
         description={m.pages.reports.description}
         action={
-          <Button variant="outline" onClick={exportReport}>
+          <Button data-tour="report-summary" variant="outline" onClick={exportReport}>
             <Download data-icon="inline-start" /> {m.pages.reports.export}
           </Button>
         }
