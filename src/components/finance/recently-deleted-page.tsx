@@ -43,7 +43,6 @@ export function RecentlyDeletedPage() {
             {transactions.map((transaction, index) => (
               <li
                 key={transaction.id}
-                data-tour={index === 0 ? 'deleted-content' : undefined}
                 className="flex flex-wrap items-center gap-3 py-4"
               >
                 <div
@@ -67,7 +66,7 @@ export function RecentlyDeletedPage() {
                   {transaction.type === 'income' ? '+' : '−'}
                   {formatCurrency(transaction.amount, currency)}
                 </p>
-                <div className="flex gap-1">
+                <div data-tour={index === 0 ? 'deleted-content' : undefined} className="flex gap-1">
                   <Button
                     type="button"
                     variant="ghost"
