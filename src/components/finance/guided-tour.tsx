@@ -33,6 +33,24 @@ const STEPS = [
     title: 'ดูภาพรวมในรายงาน',
     description: 'ตรวจสอบรายรับ รายจ่าย อัตราการออม และยอดใช้จ่ายแยกตามหมวดหมู่ หรือส่งออกรายงานเป็น CSV',
   },
+  {
+    path: '/calendar',
+    selector: '[data-tour="calendar-grid"] button[aria-pressed="true"]',
+    title: 'ดูรายการตามปฏิทิน',
+    description: 'เลือกวันที่ในปฏิทินเพื่อดูรายการรายรับรายจ่ายและยอดรวมของวันนั้น เลื่อนเดือนเพื่อดูข้อมูลช่วงอื่นได้',
+  },
+  {
+    path: '/transactions',
+    selector: '[data-tour="transaction-filters"]',
+    title: 'ค้นหาและจัดการรายการ',
+    description: 'ดูรายการทั้งหมดได้ที่นี่ ใช้ตัวกรองตามประเภทรายการ หรือกดปุ่มค้นหาเพื่อกรองตามรายละเอียด ปี เดือน และวัน',
+  },
+  {
+    path: '/recently-deleted',
+    selector: '[data-tour="deleted-content"]',
+    title: 'กู้คืนรายการที่ลบไป',
+    description: 'รายการที่ลบจะแสดงที่นี่ คุณแก้ไขข้อมูลหรือกู้คืนรายการกลับไปได้จากปุ่มข้างรายการ',
+  },
 ] as const
 
 type Spotlight = {

@@ -84,7 +84,7 @@ export function CalendarPage() {
             <ChevronRight aria-hidden="true" />
           </Button>
         </div>
-        <div className="grid grid-cols-7 border-l border-t border-border">
+        <div data-tour="calendar-grid" className="grid grid-cols-7 border-l border-t border-border">
           {WEEKDAYS.map((weekday) => (
             <div key={weekday} className="border-b border-r border-border bg-secondary px-1 py-2 text-center text-xs text-muted-foreground sm:px-2 sm:text-sm">
               {weekday}
