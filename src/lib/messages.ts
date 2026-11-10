@@ -1,0 +1,193 @@
+/**
+ * ข้อความบนหน้าจอทั้งหมดอยู่ที่ไฟล์นี้ไฟล์เดียว (UI strings live here).
+ * อยากเปลี่ยนคำไหน ให้แก้ค่าด้านขวาของ ':' แล้วบันทึก — ไม่ต้องไปไล่หาในคอมโพเนนต์
+ * ข้อความที่ต้องแทรกตัวเลข/ชื่อ จะเขียนเป็นฟังก์ชัน เช่น (p: number) => `...${p}...`
+ *
+ * หมายเหตุ: ชื่อหมวดหมู่ / รายการตัวอย่าง / รูปแบบวันที่และสกุลเงิน อยู่ใน src/lib/finance.ts
+ */
+export const messages = {
+  brand: 'Ledgerly',
+
+  nav: {
+    label: 'เมนูหลัก',
+    monthLabel: 'เลือกเดือนและปี',
+    overview: 'ภาพรวม',
+    transactions: 'รายการธุรกรรม',
+    recentlyDeleted: 'รายการที่เพิ่งลบ',
+    calendar: 'ปฏิทิน',
+    categories: 'หมวดหมู่',
+    budgets: 'งบประมาณ',
+    reports: 'รายงาน',
+    settings: 'ตั้งค่า',
+  },
+
+  theme: {
+    toLight: 'เปลี่ยนเป็นโหมดสว่าง',
+    toDark: 'เปลี่ยนเป็นโหมดมืด',
+  },
+
+  dashboard: {
+    heading: (month: string) => `การเงินประจำเดือน ${month}`,
+  },
+
+  statement: {
+    title: (month: string) => `กระแสเงินสดสุทธิ · ${month}`,
+    kept: (percent: number) => `คุณเก็บเงินไว้ได้ ${percent}% ของรายได้เดือนนี้`,
+    noIncome: 'เดือนนี้ยังไม่มีรายได้ที่บันทึกไว้',
+    moneyIn: 'เงินเข้า',
+    moneyOut: 'เงินออก',
+    noPrior: 'ไม่มีข้อมูลเดือนก่อน',
+    vsLastMonth: (change: string) => `${change}% จากเดือนก่อน`,
+    spentAria: (percent: number) => `ใช้ไป ${percent}% ของรายได้`,
+    spent: (percent: number) => `ใช้ไป ${percent}%`,
+    saved: (percent: number) => `เหลือเก็บ ${percent}%`,
+  },
+
+  cashflow: {
+    title: 'กระแสเงินสด',
+    income: 'รายรับ',
+    expense: 'รายจ่าย',
+  },
+
+  breakdown: {
+    title: 'เงินไปอยู่ที่ไหน',
+    empty: 'เดือนนี้ยังไม่มีรายจ่ายที่บันทึกไว้',
+  },
+
+  budgetList: {
+    title: 'งบประมาณ',
+    usedPrefix: 'ใช้ไป',
+    of: 'จาก',
+    progressAria: (category: string) => `งบประมาณ${category}`,
+    over: (amount: string) => `เกิน ${amount}`,
+    left: (amount: string) => `เหลือ ${amount}`,
+  },
+
+  transactionsPanel: {
+    title: 'รายการธุรกรรม',
+    add: 'เพิ่มรายการ',
+    close: 'ปิด',
+    filterAria: 'กรองตามประเภท',
+    all: 'ทั้งหมด',
+    income: 'รายรับ',
+    expense: 'รายจ่าย',
+    search: 'ค้นหา',
+    empty: 'ไม่พบรายการที่ตรงกัน',
+    editAria: (description: string) => `แก้ไข ${description}`,
+    deleteAria: (description: string) => `ลบ ${description}`,
+    restoreAria: (description: string) => `กู้คืน ${description}`,
+  },
+
+  form: {
+    typeAria: 'ประเภทรายการ',
+    expense: 'รายจ่าย',
+    income: 'รายรับ',
+    description: 'รายละเอียด',
+    descriptionPlaceholder: 'เช่น เมล็ดกาแฟ',
+    amount: 'จำนวนเงิน (บาท)',
+    date: 'วันที่',
+    time: 'เวลา',
+    category: 'หมวดหมู่',
+    save: 'บันทึกรายการ',
+    update: 'บันทึกการแก้ไข',
+    cancel: 'ยกเลิก',
+    errorDescription: 'กรุณาใส่รายละเอียดสั้น ๆ',
+    errorAmount: 'จำนวนเงินต้องมากกว่า 0',
+    errorDate: 'กรุณาระบุวันที่ให้ถูกต้อง',
+    errorTime: 'กรุณาระบุเวลาให้ถูกต้อง',
+  },
+
+  pages: {
+    transactions: {
+      eyebrow: 'กิจกรรม',
+      title: 'รายการธุรกรรม',
+      description: 'บันทึกเงินเข้าและเงินออกทั้งหมดของคุณ',
+      add: 'เพิ่มรายการ',
+      all: 'ทุกรายการ',
+      income: 'รายรับ',
+      expense: 'รายจ่าย',
+      search: 'ค้นหารายการ',
+    },
+    recentlyDeleted: {
+      eyebrow: 'ถังรายการ',
+      title: 'รายการที่เพิ่งลบ',
+      description: 'แก้ไขข้อมูลหรือกู้คืนรายการที่ลบไว้',
+      edit: 'แก้ไข',
+      restore: 'กู้คืน',
+      deletedAt: 'ลบเมื่อ',
+      empty: 'ไม่มีรายการที่เพิ่งลบ',
+    },
+    categories: {
+      eyebrow: 'การจัดระเบียบ',
+      title: 'หมวดหมู่',
+      description: 'ดูว่าส่วนไหนของชีวิตที่ใช้เงินมากที่สุด',
+      new: 'หมวดหมู่ใหม่',
+      name: 'ชื่อหมวดหมู่',
+      type: 'ประเภทรายการ',
+      create: 'เพิ่มหมวดหมู่',
+      edit: 'แก้ไข',
+      update: 'บันทึกการแก้ไข',
+      delete: 'ลบ',
+      cancel: 'ยกเลิก',
+      editAria: (name: string) => `แก้ไขหมวดหมู่ ${name}`,
+      deleteAria: (name: string) => `ลบหมวดหมู่ ${name}`,
+      deleteConfirm: (name: string) => `ซ่อนหมวดหมู่ "${name}" จากการใช้งานใหม่? รายการและงบประมาณเดิมจะยังคงอยู่`,
+      duplicate: 'มีหมวดหมู่นี้อยู่แล้ว',
+      saving: 'กำลังบันทึก…',
+    },
+    calendar: {
+      eyebrow: 'กิจกรรมตามวัน',
+      title: 'ปฏิทินรายรับรายจ่าย',
+      description: 'ดูรายการและเวลาที่ทำธุรกรรมในแต่ละวันของเดือน',
+      income: 'รายรับ',
+      expense: 'รายจ่าย',
+      noTransactions: 'วันนี้ไม่มีรายการธุรกรรม',
+      dayTotal: 'ยอดรวมวันนี้',
+      transactionCount: (count: number) => `${count} รายการ`,
+    },
+    budgets: {
+      eyebrow: 'การวางแผน',
+      title: 'งบประมาณ',
+      description: 'กำหนดวงเงินรายเดือน เพื่อให้เงินทุกบาทมีหน้าที่',
+      create: 'สร้างงบประมาณ',
+      monthlyLimit: 'วงเงินรายเดือน',
+      over: 'เกินงบประมาณ',
+      left: (amount: string) => `เหลือ ${amount}`,
+    },
+    reports: {
+      eyebrow: 'ข้อมูลเชิงลึก',
+      title: 'รายงาน',
+      description: 'ดูภาพรวมพฤติกรรมการเงินของคุณจากทุกรายการ',
+      export: 'ส่งออกรายงาน',
+      totalIncome: 'รายรับรวม',
+      totalExpense: 'รายจ่ายรวม',
+      savingsRate: 'อัตราการออม',
+      byCategory: 'รายจ่ายแยกตามหมวดหมู่',
+      byCategoryDesc: 'หมวดที่ใช้จ่ายมากที่สุดจากทุกรายการ',
+    },
+    settings: {
+      eyebrow: 'พื้นที่ทำงาน',
+      title: 'ตั้งค่า',
+      description: 'ปรับ Ledgerly ให้เข้ากับวิธีจัดการเงินของคุณ',
+      appearance: 'การแสดงผล',
+      appearanceDesc: 'เลือกลักษณะการแสดงผลของ Ledgerly บนหน้าจอ',
+      dark: 'โหมดมืด',
+      light: 'โหมดสว่าง',
+      profile: 'โปรไฟล์และสกุลเงิน',
+      profileDesc: 'ปรับรายละเอียดที่ใช้ในรายงานของคุณ',
+      displayName: 'ชื่อที่แสดง',
+      defaultName: 'สมชาย ใจดี',
+      currency: 'สกุลเงิน',
+      currencyDesc: 'เปลี่ยนสกุลเงินที่แสดงผล โดยไม่แปลงอัตราแลกเปลี่ยน',
+      currencies: [
+        { code: 'THB', label: 'THB — บาทไทย' },
+        { code: 'USD', label: 'USD — ดอลลาร์สหรัฐ' },
+        { code: 'EUR', label: 'EUR — ยูโร' },
+        { code: 'GBP', label: 'GBP — ปอนด์สเตอร์ลิง' },
+      ],
+      save: 'บันทึกการตั้งค่า',
+      saved: 'บันทึกการตั้งค่าแล้ว',
+      displayNameRequired: 'กรุณาระบุชื่อที่แสดง',
+    },
+  },
+} as const

@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+model Category {
+  id           String        @id @default(cuid())
+  name         String
+  type         TransactionType
+  isActive     Boolean       @default(true)
+  transactions Transaction[]
+  budgets      Budget[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@unique([name, type])
+  @@index([type])
+}
+
+model Transaction {
+  id         String          @id @default(cuid())
+  title      String
+  amount     Decimal        @db.Decimal(12, 2)
+  type       TransactionType
+  date       DateTime
+  time       String          @default("12:00") @db.VarChar(5)
+  note       String?
+  categoryId String
+  category   Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  deletedAt  DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@index([date])
+  @@index([type, date])
+  @@index([categoryId])
+  @@index([deletedAt])
+}
+
+model Budget {
+  id           String   @id @default(cuid())
+  categoryId   String
+  category     Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  month        DateTime @db.Date
+  budgetAmount Decimal  @db.Decimal(12, 2)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([categoryId, month])
+  @@index([month])
+}
