@@ -54,7 +54,7 @@ export function ReportsPage() {
           </Button>
         }
       />
-      <div className="grid gap-6 md:grid-cols-3">
+      <div data-tour="report-summary" className="grid gap-6 md:grid-cols-3">
         <Panel>
           <p className="text-sm text-muted-foreground">{m.pages.reports.totalIncome}</p>
           <p className="mt-3 font-mono text-3xl text-income tabular-nums">{formatCurrency(t.income, currency)}</p>

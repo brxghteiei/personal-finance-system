@@ -93,7 +93,7 @@ export function CategoriesPage() {
         title={m.pages.categories.title}
         description={m.pages.categories.description}
         action={
-          <Button variant="outline" onClick={() => {
+          <Button data-tour="create-category" variant="outline" onClick={() => {
             setEditingCategory(null)
             setName('')
             setError(null)
