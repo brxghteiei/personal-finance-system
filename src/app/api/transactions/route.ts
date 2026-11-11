@@ -2,15 +2,18 @@ import { NextResponse } from 'next/server'
 import { TransactionType } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { transactionInput } from '@/validators/transaction'
+import { requireApiUser } from '@/lib/auth/api'
 
 const transactionType = {
   income: TransactionType.INCOME,
   expense: TransactionType.EXPENSE,
 } as const
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireApiUser(request)
+  if (!auth.user) return auth.response
   const transactions = await prisma.transaction.findMany({
-    where: { deletedAt: null },
+    where: { ownerId: auth.user.id, deletedAt: null },
     include: { category: true },
     orderBy: [{ date: 'desc' }, { createdAt: 'desc' }],
   })
@@ -29,6 +32,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const input = transactionInput.safeParse(await request.json())
   if (!input.success) {
     return NextResponse.json({ error: input.error.issues[0]?.message ?? 'ข้อมูลรายการไม่ถูกต้อง' }, { status: 400 })
@@ -44,10 +49,11 @@ export async function POST(request: Request) {
       type: transactionType[type],
       category: {
         connectOrCreate: {
-          where: { name_type: { name: category, type: transactionType[type] } },
-          create: { name: category, type: transactionType[type] },
+          where: { ownerId_name_type: { ownerId: auth.user.id, name: category, type: transactionType[type] } },
+          create: { name: category, type: transactionType[type], ownerId: auth.user.id },
         },
       },
+      owner: { connect: { id: auth.user.id } },
     },
     include: { category: true },
   })

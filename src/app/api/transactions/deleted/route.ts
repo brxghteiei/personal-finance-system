@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 import { TransactionType } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
+import { requireApiUser } from '@/lib/auth/api'
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireApiUser(request)
+  if (!auth.user) return auth.response
   const transactions = await prisma.transaction.findMany({
-    where: { deletedAt: { not: null } },
+    where: { ownerId: auth.user.id, deletedAt: { not: null } },
     include: { category: true },
     orderBy: [{ deletedAt: 'desc' }, { date: 'desc' }],
   })

@@ -19,6 +19,10 @@
 7. เปิดเว็บ: `npm run dev`
 8. เข้า `http://localhost:3000`
 
+เริ่มรัน
+docker compose up -d
+npm run dev
+
 PostgreSQL ใช้พอร์ต `5434` ซึ่งตรงกับ `DATABASE_URL` ในไฟล์ `.env`
 
 ## โครงสร้างเริ่มต้น

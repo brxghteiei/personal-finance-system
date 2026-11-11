@@ -6,7 +6,7 @@
  * หมายเหตุ: ชื่อหมวดหมู่ / รายการตัวอย่าง / รูปแบบวันที่และสกุลเงิน อยู่ใน src/lib/finance.ts
  */
 export const messages = {
-  brand: 'Ledgerly',
+  brand: 'Personal Finance',
 
   nav: {
     label: 'เมนูหลัก',
@@ -168,9 +168,9 @@ export const messages = {
     settings: {
       eyebrow: 'พื้นที่ทำงาน',
       title: 'ตั้งค่า',
-      description: 'ปรับ Ledgerly ให้เข้ากับวิธีจัดการเงินของคุณ',
+      description: 'ปรับ Personal Finance ให้เข้ากับวิธีจัดการเงินของคุณ',
       appearance: 'การแสดงผล',
-      appearanceDesc: 'เลือกลักษณะการแสดงผลของ Ledgerly บนหน้าจอ',
+      appearanceDesc: 'เลือกลักษณะการแสดงผลของ Personal Finance บนหน้าจอ',
       dark: 'โหมดมืด',
       light: 'โหมดสว่าง',
       profile: 'โปรไฟล์และสกุลเงิน',

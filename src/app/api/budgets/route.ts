@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { TransactionType } from '@prisma/client'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { requireApiUser } from '@/lib/auth/api'
 
 const monthSchema = z.string().regex(/^\d{4}-\d{2}$/).refine((value) => {
   const parsed = new Date(`${value}-01T00:00:00.000Z`)
@@ -24,6 +25,8 @@ function toBudget(budget: { id: string; budgetAmount: { toString(): string }; mo
 }
 
 export async function GET(request: Request) {
+  const auth = await requireApiUser(request)
+  if (!auth.user) return auth.response
   const month = new URL(request.url).searchParams.get('month')
   const parsedMonth = month === null ? null : monthSchema.safeParse(month)
   if (parsedMonth && !parsedMonth.success) {
@@ -31,7 +34,10 @@ export async function GET(request: Request) {
   }
 
   const budgets = await prisma.budget.findMany({
-    where: parsedMonth?.success ? { month: new Date(`${parsedMonth.data}-01T00:00:00.000Z`) } : undefined,
+    where: {
+      ownerId: auth.user.id,
+      ...(parsedMonth?.success ? { month: new Date(`${parsedMonth.data}-01T00:00:00.000Z`) } : {}),
+    },
     include: { category: true },
     orderBy: { category: { name: 'asc' } },
   })
@@ -40,6 +46,8 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const parsed = budgetInput.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'ข้อมูลงบประมาณไม่ถูกต้อง' }, { status: 400 })
@@ -47,9 +55,9 @@ export async function POST(request: Request) {
 
   const { category, limit, month } = parsed.data
   const categoryRecord = await prisma.category.upsert({
-    where: { name_type: { name: category, type: TransactionType.EXPENSE } },
+    where: { ownerId_name_type: { ownerId: auth.user.id, name: category, type: TransactionType.EXPENSE } },
     update: {},
-    create: { name: category, type: TransactionType.EXPENSE },
+    create: { name: category, type: TransactionType.EXPENSE, ownerId: auth.user.id },
   })
   const budget = await prisma.budget.upsert({
     where: {
@@ -60,6 +68,7 @@ export async function POST(request: Request) {
     },
     update: { budgetAmount: limit },
     create: {
+      ownerId: auth.user.id,
       categoryId: categoryRecord.id,
       month: new Date(`${month}-01T00:00:00.000Z`),
       budgetAmount: limit,

@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { requireApiUser } from '@/lib/auth/api'
 
-export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const { id } = await params
   const restored = await prisma.transaction.updateMany({
-    where: { id, deletedAt: { not: null } },
+    where: { id, ownerId: auth.user.id, deletedAt: { not: null } },
     data: { deletedAt: null },
   })
 

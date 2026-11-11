@@ -3,21 +3,18 @@ import { PrismaClient, TransactionType } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.category.upsert({
-    where: { name_type: { name: "เงินเดือน", type: TransactionType.INCOME } },
-    update: {},
-    create: { name: "เงินเดือน", type: TransactionType.INCOME },
-  });
-  await prisma.category.upsert({
-    where: { name_type: { name: "อาหาร", type: TransactionType.EXPENSE } },
-    update: {},
-    create: { name: "อาหาร", type: TransactionType.EXPENSE },
-  });
-  await prisma.category.upsert({
-    where: { name_type: { name: "เดินทาง", type: TransactionType.EXPENSE } },
-    update: {},
-    create: { name: "เดินทาง", type: TransactionType.EXPENSE },
-  });
+  const defaults = [
+    { name: "เงินเดือน", type: TransactionType.INCOME },
+    { name: "อาหาร", type: TransactionType.EXPENSE },
+    { name: "เดินทาง", type: TransactionType.EXPENSE },
+  ];
+  for (const category of defaults) {
+    const existing = await prisma.category.findFirst({
+      where: { ownerId: null, ...category },
+      select: { id: true },
+    });
+    if (!existing) await prisma.category.create({ data: category });
+  }
 
 }
 

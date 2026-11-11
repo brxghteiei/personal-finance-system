@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { Prisma, TransactionType } from '@prisma/client'
 import { prisma } from '@/lib/prisma'
 import { transactionInput } from '@/validators/transaction'
+import { requireApiUser } from '@/lib/auth/api'
 
 const transactionType = {
   income: TransactionType.INCOME,
@@ -9,6 +10,8 @@ const transactionType = {
 } as const
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const { id } = await params
   const parsed = transactionInput.safeParse(await request.json())
   if (!parsed.success) {
@@ -17,21 +20,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   const { description, amount, date, time, category, type } = parsed.data
   try {
-    const saved = await prisma.transaction.update({
-      where: { id },
+    const categoryRecord = await prisma.category.upsert({
+      where: { ownerId_name_type: { ownerId: auth.user.id, name: category, type: transactionType[type] } },
+      update: { isActive: true },
+      create: { ownerId: auth.user.id, name: category, type: transactionType[type] },
+    })
+    const changed = await prisma.transaction.updateMany({
+      where: { id, ownerId: auth.user.id },
       data: {
         title: description,
         amount,
         date: new Date(`${date}T00:00:00.000Z`),
         time,
         type: transactionType[type],
-        category: {
-          connectOrCreate: {
-            where: { name_type: { name: category, type: transactionType[type] } },
-            create: { name: category, type: transactionType[type] },
-          },
-        },
+        categoryId: categoryRecord.id,
       },
+    })
+    if (changed.count !== 1) return NextResponse.json({ error: 'ไม่พบรายการที่ต้องการแก้ไข' }, { status: 404 })
+    const saved = await prisma.transaction.findFirstOrThrow({
+      where: { id, ownerId: auth.user.id },
       include: { category: true },
     })
 
@@ -53,11 +60,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const auth = await requireApiUser(_request, true)
+  if (!auth.user) return auth.response
   const { id } = await params
   const deletedAt = new Date()
   try {
     const deleted = await prisma.transaction.updateMany({
-      where: { id, deletedAt: null },
+      where: { id, ownerId: auth.user.id, deletedAt: null },
       data: { deletedAt },
     })
     if (deleted.count === 0) {

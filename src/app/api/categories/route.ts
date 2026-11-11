@@ -3,6 +3,7 @@ import { TransactionType } from '@prisma/client'
 import { z } from 'zod'
 import { CATEGORIES, type TransactionType as FinanceTransactionType } from '@/lib/finance'
 import { prisma } from '@/lib/prisma'
+import { requireApiUser } from '@/lib/auth/api'
 
 const categoryInput = z.object({
   name: z.string().trim().min(1).max(80),
@@ -26,8 +27,11 @@ const transactionType = {
 } as const
 const builtInCategories: Record<FinanceTransactionType, readonly string[]> = CATEGORIES
 
-export async function GET() {
+export async function GET(request: Request) {
+  const auth = await requireApiUser(request)
+  if (!auth.user) return auth.response
   const saved = await prisma.category.findMany({
+    where: { ownerId: auth.user.id },
     orderBy: [{ type: 'asc' }, { name: 'asc' }],
   })
 
@@ -57,6 +61,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const parsed = categoryInput.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'ข้อมูลหมวดหมู่ไม่ถูกต้อง' }, { status: 400 })
@@ -64,7 +70,7 @@ export async function POST(request: Request) {
 
   const { name, type } = parsed.data
   const existing = await prisma.category.findUnique({
-    where: { name_type: { name, type: transactionType[type] } },
+    where: { ownerId_name_type: { ownerId: auth.user.id, name, type: transactionType[type] } },
   })
   if (existing?.isActive || (!existing && builtInCategories[type].includes(name))) {
     return NextResponse.json({ error: 'มีหมวดหมู่นี้อยู่แล้ว' }, { status: 409 })
@@ -76,13 +82,15 @@ export async function POST(request: Request) {
         data: { isActive: true },
       })
     : await prisma.category.create({
-        data: { name, type: transactionType[type] },
+        data: { name, type: transactionType[type], ownerId: auth.user.id },
       })
 
   return NextResponse.json({ name: category.name, type }, { status: 201 })
 }
 
 export async function PATCH(request: Request) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const parsed = categoryUpdateInput.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'ข้อมูลหมวดหมู่ไม่ถูกต้อง' }, { status: 400 })
@@ -99,10 +107,10 @@ export async function PATCH(request: Request) {
   }
 
   const current = await prisma.category.findUnique({
-    where: { name_type: { name: currentName, type } },
+    where: { ownerId_name_type: { ownerId: auth.user.id, name: currentName, type } },
   })
   const duplicate = await prisma.category.findUnique({
-    where: { name_type: { name, type } },
+    where: { ownerId_name_type: { ownerId: auth.user.id, name, type } },
   })
   if (duplicate) return NextResponse.json({ error: 'มีหมวดหมู่นี้อยู่แล้ว' }, { status: 409 })
 
@@ -116,16 +124,18 @@ export async function PATCH(request: Request) {
 
   await prisma.$transaction([
     prisma.category.upsert({
-      where: { name_type: { name: currentName, type } },
+      where: { ownerId_name_type: { ownerId: auth.user.id, name: currentName, type } },
       update: { isActive: false },
-      create: { name: currentName, type, isActive: false },
+      create: { name: currentName, type, isActive: false, ownerId: auth.user.id },
     }),
-    prisma.category.create({ data: { name, type, isActive: true } }),
+    prisma.category.create({ data: { name, type, isActive: true, ownerId: auth.user.id } }),
   ])
   return NextResponse.json({ name, type: currentType })
 }
 
 export async function DELETE(request: Request) {
+  const auth = await requireApiUser(request, true)
+  if (!auth.user) return auth.response
   const parsed = categoryKeyInput.safeParse(await request.json())
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.issues[0]?.message ?? 'ข้อมูลหมวดหมู่ไม่ถูกต้อง' }, { status: 400 })
@@ -134,7 +144,7 @@ export async function DELETE(request: Request) {
   const { name, type } = parsed.data
   const categoryType = transactionType[type]
   const category = await prisma.category.findUnique({
-    where: { name_type: { name, type: categoryType } },
+    where: { ownerId_name_type: { ownerId: auth.user.id, name, type: categoryType } },
   })
 
   if (category) {
@@ -144,7 +154,7 @@ export async function DELETE(request: Request) {
     })
   } else {
     await prisma.category.create({
-      data: { name, type: categoryType, isActive: false },
+      data: { name, type: categoryType, isActive: false, ownerId: auth.user.id },
     })
   }
 
