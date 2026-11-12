@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { CalendarDays, ChartNoAxesCombined, CircleHelp, House, PieChart, ReceiptText, RotateCcw, Tags, Wallet } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { CalendarDays, ChartNoAxesCombined, CircleHelp, House, LogOut, PieChart, ReceiptText, RotateCcw, Tags, Wallet, WalletCards } from 'lucide-react'
+import { useState } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { messages as m } from '@/lib/messages'
 import { cn } from '@/lib/utils'
@@ -26,8 +27,8 @@ export function AppHeader() {
   return (
     <aside className="sticky top-0 flex h-dvh w-16 shrink-0 flex-col border-r border-border bg-card px-2 py-4 md:w-64 md:px-4">
       <Link href="/" className="mb-8 flex items-center justify-center gap-3 md:justify-start">
-        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-md bg-white">
-          <Image src="/icon.svg" alt="" width={24} height={24} />
+        <span aria-hidden="true" className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <WalletCards className="size-5" />
         </span>
         <span className="hidden text-lg font-semibold tracking-tight md:inline">{m.brand}</span>
       </Link>
@@ -78,7 +79,28 @@ export function AppHeader() {
 
 export function AppToolbar() {
   const pathname = usePathname()
+  const router = useRouter()
   const { selectedMonth, setSelectedMonth } = useFinance()
+  const [logoutBusy, setLogoutBusy] = useState(false)
+  const [logoutError, setLogoutError] = useState('')
+
+  async function logout() {
+    setLogoutBusy(true)
+    setLogoutError('')
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' })
+      if (!response.ok) {
+        setLogoutError('ออกจากระบบไม่สำเร็จ กรุณาลองใหม่')
+        return
+      }
+      router.replace('/login')
+      router.refresh()
+    } catch {
+      setLogoutError('ไม่สามารถเชื่อมต่อระบบเพื่อออกจากระบบได้')
+    } finally {
+      setLogoutBusy(false)
+    }
+  }
 
   return (
     <header className="flex min-h-16 items-center justify-end gap-3 border-b border-border px-4 md:px-8">
@@ -106,6 +128,16 @@ export function AppToolbar() {
         <span>คู่มือเริ่มต้น</span>
       </button>
       <ThemeToggle />
+      {logoutError && <span role="alert" className="text-sm text-destructive">{logoutError}</span>}
+      <button
+        type="button"
+        onClick={logout}
+        disabled={logoutBusy}
+        className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border px-3 text-sm text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-60"
+      >
+        <LogOut aria-hidden="true" className="size-4" />
+        <span className="hidden sm:inline">{logoutBusy ? 'กำลังออกจากระบบ…' : 'ออกจากระบบ'}</span>
+      </button>
     </header>
   )
 }
