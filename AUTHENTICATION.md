@@ -9,7 +9,7 @@ Existing Argon2 password hashes can be imported into Supabase Auth. `scripts/mig
 ## Environment and Supabase setup
 
 1. Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for local development and Vercel.
-2. Set `APP_URL` to the current application origin. In Supabase Auth URL Configuration, set the Site URL to the production origin and allow the callback URLs `/auth/callback`, plus the local development callback.
+2. Set `APP_URL` to the production origin and for local development. Vercel Preview deployments use the current `VERCEL_URL` automatically. In Supabase Auth URL Configuration, set the Site URL to the production origin and allow `/auth/callback` for production, local development, and any Preview hosts used for testing.
 3. Enable email confirmations and configure custom SMTP in Supabase Auth. Supabase Auth sends signup verification and password recovery messages. The Nodemailer settings in `.env` are only used for password-change and duplicate-registration notices.
 4. Verify `.env.supabase` points to the intended Supabase PostgreSQL database, then run `npm run db:status:supabase`. Review the pending migrations before applying them with `npm run db:deploy:supabase`.
 5. Generate Prisma Client with `npm run db:generate`.

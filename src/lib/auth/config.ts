@@ -10,7 +10,9 @@ export const RESET_TOKEN_LIFETIME_MS = 30 * 60 * 1000
 export const RESEND_COOLDOWN_MS = 60 * 1000
 
 export function appUrl() {
-  const raw = process.env.APP_URL
+  const raw = process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL
+    ? `https://${process.env.VERCEL_URL}`
+    : process.env.APP_URL
   if (!raw) throw new Error('APP_URL is required for authentication links and CSRF validation')
   const url = new URL(raw)
   if (process.env.NODE_ENV === 'production' && url.protocol !== 'https:') {
