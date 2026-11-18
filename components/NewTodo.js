@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import supabase from '../utils/supabase'
 
-export default ({ reload }) => {
+export default function NewTodo({ reload }) {
   const [title, setTitle] = useState('')
 
   const addTodo = async (e) => {
