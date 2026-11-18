@@ -24,7 +24,7 @@ export const viewport: Viewport = {
   themeColor: '#11191b',
 }
 
-const PUBLIC_AUTH_PATHS = new Set(['/login', '/register', '/verify-email', '/forgot-password', '/reset-password', '/terms', '/privacy'])
+const PUBLIC_AUTH_PATHS = new Set(['/login', '/terms', '/privacy'])
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const requestHeaders = await headers()
